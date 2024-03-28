@@ -8,6 +8,7 @@ namespace MagicVilla_VillaApi.Controllers
     [ApiController] //help us to control basic props like required fields or other thing
     public class MagicVillaController : ControllerBase
     {
+        //Get 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult<IEnumerable<VillaDTO>> GetVillas()
@@ -16,7 +17,7 @@ namespace MagicVilla_VillaApi.Controllers
         }
 
         //for id search
-        [HttpGet("id",Name = "SearchVilla")]
+        [HttpGet("{id:int}",Name = "SearchVilla")]  //dont give space btw id:int it cause error
 
         //to remove undocumented under status code
         //oneway
@@ -46,12 +47,25 @@ namespace MagicVilla_VillaApi.Controllers
             return Ok(villa);
         }
 
-
+        ///************************************************************************************************************************************////
 
         //Post
         [HttpPost]
         public ActionResult<VillaDTO> createVilla([FromBody] VillaDTO villaDTO)
         {
+            //if(!ModelState.IsValid)
+            //{
+            //    return BadRequest(ModelState);
+            //}
+
+
+            //custom validation(villa name should unique)
+            if(VillaStore.villaList.FirstOrDefault(x=>x.Name.ToLower() == villaDTO.Name.ToLower()) != null)
+            {
+                ModelState.AddModelError("CustomError", "Villa Already Exist");
+                return BadRequest(ModelState);
+            }
+
             if (villaDTO == null) { 
             return BadRequest(villaDTO);}
 
@@ -66,5 +80,46 @@ namespace MagicVilla_VillaApi.Controllers
             //return Ok(villaDTO);
             return CreatedAtRoute("SearchVilla",new {id=villaDTO.Id},villaDTO);
         }
+
+        ///***********************************************************************************************************////
+        //Delete
+        [HttpDelete("{id:int}",Name = "DeleteVilla")]
+
+        public IActionResult DeleteVilla(int id) {
+            if(id == 0)
+            {
+                return BadRequest();
+            }
+            var villa=VillaStore.villaList.FirstOrDefault(u => u.Id == id);
+            if (villa == null)
+            {
+                return NotFound();
+            }
+            VillaStore.villaList.Remove(villa);
+            return NoContent();
+        }
+
+
+        ///***********************************************************************************************************////
+
+        //Update In this we have to change whole for just one model thats why we use httppatch
+        [HttpPut("{id:int}",Name ="UpdateVilla")]
+
+        public IActionResult UpdateVilla(int id, [FromBody]VillaDTO villaDTO)
+        {
+            if(villaDTO == null || id!=villaDTO.Id) { return BadRequest(); }
+            var villa=VillaStore.villaList.FirstOrDefault(u=>u.Id == id);
+
+            villa.Name= villaDTO.Name;
+            villa.Sqft=villaDTO.Sqft;
+            villa.Occupancy=villaDTO.Occupancy;
+
+            return NoContent();
+
+        }
+
+        //Patch(Update)
+
+        
     }
 }

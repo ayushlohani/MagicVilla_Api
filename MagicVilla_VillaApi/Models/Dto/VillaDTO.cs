@@ -11,5 +11,9 @@ namespace MagicVilla_VillaApi.Models.Dto
         public string Name { get; set; }
         public DateTime? CreatedDate { get; set; }=DateTime.Now;
 
+        public int Occupancy {  get; set; }
+
+        public int Sqft { get; set; }
+
     }
 }
