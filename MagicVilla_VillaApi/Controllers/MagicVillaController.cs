@@ -2,6 +2,7 @@
 using MagicVilla_VillaApi.Models;
 using MagicVilla_VillaApi.Models.Dto;
 using MagicVilla_VillaApi.Data;
+using Microsoft.AspNetCore.JsonPatch;
 namespace MagicVilla_VillaApi.Controllers
 {
     [Route("api/villaApi")] //use controller name as route we write like [Route("api/[controller]")]
@@ -51,6 +52,12 @@ namespace MagicVilla_VillaApi.Controllers
 
         //Post
         [HttpPost]
+
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+
         public ActionResult<VillaDTO> createVilla([FromBody] VillaDTO villaDTO)
         {
             //if(!ModelState.IsValid)
@@ -85,6 +92,11 @@ namespace MagicVilla_VillaApi.Controllers
         //Delete
         [HttpDelete("{id:int}",Name = "DeleteVilla")]
 
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+
         public IActionResult DeleteVilla(int id) {
             if(id == 0)
             {
@@ -105,6 +117,10 @@ namespace MagicVilla_VillaApi.Controllers
         //Update In this we have to change whole for just one model thats why we use httppatch
         [HttpPut("{id:int}",Name ="UpdateVilla")]
 
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public IActionResult UpdateVilla(int id, [FromBody]VillaDTO villaDTO)
         {
             if(villaDTO == null || id!=villaDTO.Id) { return BadRequest(); }
@@ -118,8 +134,29 @@ namespace MagicVilla_VillaApi.Controllers
 
         }
 
-        //Patch(Update)
+        //Patch(Update)  use jsonpatch.com
+        //*we have to download right cliack on main folder select mangae nuget packages and download two packages
+        //microsoft.aspnetcore.JsonPatch
+        //Microsoft.AspNetCore.Mvc.NewtonsoftJson
+        //add this packages  in program.cs where  builder.services.AddControllers() write in place builder.services.AddControllers().AddNewtonsoftJson()
 
-        
+        [HttpPatch("{id:int}", Name = "UpdatePartialVilla")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+
+        public IActionResult UpdatePartialVilla(int id, JsonPatchDocument<VillaDTO> patchDTO)
+        {
+            if (id == 0 || patchDTO == null) { return BadRequest(); }
+            var villa = VillaStore.villaList.FirstOrDefault(u => u.Id == id);
+            if (villa == null) { return BadRequest(); }
+            patchDTO.ApplyTo(villa, ModelState);
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            return NoContent(); 
+        }
     }
 }
