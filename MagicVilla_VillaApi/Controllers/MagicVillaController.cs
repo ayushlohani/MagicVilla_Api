@@ -9,11 +9,25 @@ namespace MagicVilla_VillaApi.Controllers
     [ApiController] //help us to control basic props like required fields or other thing
     public class MagicVillaController : ControllerBase
     {
+        //Logging
+        private readonly ILogger<MagicVillaController> _logger;
+        public MagicVillaController(ILogger<MagicVillaController> logger) 
+        {
+            _logger = logger;
+        }
+        //using 3rd party for logging  :- serilog.AspNetCore(package) and serilog.SinksFile
+        //writ in program.cs
+
+        //Log.Logger = new LoggerConfiguration().MinimumLevel.Debug().Writeto.File("log/villalogs.txt",rollingInterval : RollingInetrval.Day).CreateLogger();
+        //builder.Host.UseSerilog();
+
+
         //Get 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult<IEnumerable<VillaDTO>> GetVillas()
         {
+            _logger.LogInformation("Get All Villas");
             return Ok(VillaStore.villaList);
         }
 
@@ -36,6 +50,7 @@ namespace MagicVilla_VillaApi.Controllers
         {
             if(id == 0)
             {
+                _logger.LogError("Get Error Villa With" + id);
                 return BadRequest();
             }
             var villa = VillaStore.villaList.FirstOrDefault(x => x.Id == id);
