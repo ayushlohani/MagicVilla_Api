@@ -73,7 +73,7 @@ namespace MagicVilla_VillaApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
 
-        public ActionResult<VillaDTO> createVilla([FromBody] VillaDTO villaDTO)
+        public ActionResult<VillaDTO> createVilla([FromBody] VillaDTO newVilla)
         {
             //if(!ModelState.IsValid)
             //{
@@ -82,25 +82,25 @@ namespace MagicVilla_VillaApi.Controllers
 
 
             //custom validation(villa name should unique)
-            if(VillaStore.villaList.FirstOrDefault(x=>x.Name.ToLower() == villaDTO.Name.ToLower()) != null)
+            if(VillaStore.villaList.FirstOrDefault(x=>x.Name.ToLower() == newVilla.Name.ToLower()) != null)
             {
                 ModelState.AddModelError("CustomError", "Villa Already Exist");
                 return BadRequest(ModelState);
             }
 
-            if (villaDTO == null) { 
-            return BadRequest(villaDTO);}
+            if (newVilla == null) { 
+            return BadRequest(newVilla);}
 
-            if (villaDTO.Id > 0)
+            if (newVilla.Id > 0)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
 
-            villaDTO.Id = VillaStore.villaList.OrderByDescending(x=>x.Id).FirstOrDefault().Id+1;
-            VillaStore.villaList.Add(villaDTO);
+            newVilla.Id = VillaStore.villaList.OrderByDescending(x=>x.Id).FirstOrDefault().Id+1;
+            VillaStore.villaList.Add(newVilla);
 
             //return Ok(villaDTO);
-            return CreatedAtRoute("SearchVilla",new {id=villaDTO.Id},villaDTO);
+            return CreatedAtRoute("SearchVilla",new {id=newVilla.Id},newVilla);
         }
 
         ///***********************************************************************************************************////
