@@ -1,20 +1,32 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using MagicVilla_VillaApi.Models;
 using MagicVilla_VillaApi.Models.Dto;
 using MagicVilla_VillaApi.Data;
 using Microsoft.AspNetCore.JsonPatch;
+using MagicVilla_VillaApi.logging;
 namespace MagicVilla_VillaApi.Controllers
 {
     [Route("api/villaApi")] //use controller name as route we write like [Route("api/[controller]")]
     [ApiController] //help us to control basic props like required fields or other thing
     public class MagicVillaController : ControllerBase
     {
-        //Logging
-        private readonly ILogger<MagicVillaController> _logger;
-        public MagicVillaController(ILogger<MagicVillaController> logger) 
-        {
+        //Dependcy Injection
+        private readonly ILogging _logger;
+        public MagicVillaController(ILogging logger) {
             _logger = logger;
+            Console.WriteLine("Hello");
         }
+        
+        
+        //Logging
+
+
+        //private readonly ILogger<MagicVillaController> _logger;
+        //public MagicVillaController(ILogger<MagicVillaController> logger) 
+        //{
+        //    _logger = logger;
+        //}
+
+
         //using 3rd party for logging  :- serilog.AspNetCore(package) and serilog.SinksFile
         //writ in program.cs
 
@@ -27,8 +39,10 @@ namespace MagicVilla_VillaApi.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult<IEnumerable<VillaDTO>> GetVillas()
         {
-            _logger.LogInformation("Get All Villas");
-            return Ok(VillaStore.villaList);
+            _logger.Log("Get all villas","");
+            
+            //_logger.LogInformation("Get All Villas");
+            return Ok(VillaStore.villaList); 
         }
 
         //for id search
@@ -50,7 +64,9 @@ namespace MagicVilla_VillaApi.Controllers
         {
             if(id == 0)
             {
-                _logger.LogError("Get Error Villa With" + id);
+                _logger.Log($"Get Error Villa With\" + {id}", "error");
+
+                //_logger.LogError("Get Error Villa With" + id);
                 return BadRequest();
             }
             var villa = VillaStore.villaList.FirstOrDefault(x => x.Id == id);
@@ -73,7 +89,7 @@ namespace MagicVilla_VillaApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
 
-        public ActionResult<VillaDTO> createVilla([FromBody] VillaDTO villaDTO)
+        public ActionResult<VillaDTO> createVilla([FromBody] VillaDTO newVilla)
         {
             //if(!ModelState.IsValid)
             //{
@@ -82,25 +98,27 @@ namespace MagicVilla_VillaApi.Controllers
 
 
             //custom validation(villa name should unique)
-            if(VillaStore.villaList.FirstOrDefault(x=>x.Name.ToLower() == villaDTO.Name.ToLower()) != null)
+            if (VillaStore.villaList.FirstOrDefault(x => x.Name.ToLower() == newVilla.Name.ToLower()) != null)
             {
                 ModelState.AddModelError("CustomError", "Villa Already Exist");
                 return BadRequest(ModelState);
             }
 
-            if (villaDTO == null) { 
-            return BadRequest(villaDTO);}
+            if (newVilla == null)
+            {
+                return BadRequest(newVilla);
+            }
 
-            if (villaDTO.Id > 0)
+            if (newVilla.Id > 0)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
 
-            villaDTO.Id = VillaStore.villaList.OrderByDescending(x=>x.Id).FirstOrDefault().Id+1;
-            VillaStore.villaList.Add(villaDTO);
+            newVilla.Id = VillaStore.villaList.OrderByDescending(x => x.Id).FirstOrDefault().Id + 1;
+            VillaStore.villaList.Add(newVilla);
 
             //return Ok(villaDTO);
-            return CreatedAtRoute("SearchVilla",new {id=villaDTO.Id},villaDTO);
+            return CreatedAtRoute("SearchVilla", new { id = newVilla.Id }, newVilla);
         }
 
         ///***********************************************************************************************************////
