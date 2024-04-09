@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using MagicVilla_VillaApi.Models.Dto;
-using MagicVilla_VillaApi.Data;
-using Microsoft.AspNetCore.JsonPatch;
+﻿using MagicVilla_VillaApi.Data;
 using MagicVilla_VillaApi.logging;
+using MagicVilla_VillaApi.Models.Dto;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
 namespace MagicVilla_VillaApi.Controllers
 {
     [Route("api/villaApi")] //use controller name as route we write like [Route("api/[controller]")]
@@ -11,12 +11,13 @@ namespace MagicVilla_VillaApi.Controllers
     {
         //Dependcy Injection
         private readonly ILogging _logger;
-        public MagicVillaController(ILogging logger) {
+        public MagicVillaController(ILogging logger)
+        {
             _logger = logger;
             Console.WriteLine("Hello");
         }
-        
-        
+
+
         //Logging
 
 
@@ -39,14 +40,14 @@ namespace MagicVilla_VillaApi.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult<IEnumerable<VillaDTO>> GetVillas()
         {
-            _logger.Log("Get all villas","");
-            
+            _logger.Log("Get all villas", "");
+
             //_logger.LogInformation("Get All Villas");
-            return Ok(VillaStore.villaList); 
+            return Ok(VillaStore.villaList);
         }
 
         //for id search
-        [HttpGet("{id:int}",Name = "SearchVilla")]  //dont give space btw id:int it cause error
+        [HttpGet("{id:int}", Name = "SearchVilla")]  //dont give space btw id:int it cause error
 
         //to remove undocumented under status code
         //oneway
@@ -62,7 +63,7 @@ namespace MagicVilla_VillaApi.Controllers
 
         public ActionResult<VillaDTO> SearchVilla(int id)
         {
-            if(id == 0)
+            if (id == 0)
             {
                 _logger.Log($"Get Error Villa With\" + {id}", "error");
 
@@ -98,10 +99,18 @@ namespace MagicVilla_VillaApi.Controllers
 
 
             //custom validation(villa name should unique)
+
             if (VillaStore.villaList.FirstOrDefault(x => x.Name.ToLower() == newVilla.Name.ToLower()) != null)
+
             {
                 ModelState.AddModelError("CustomError", "Villa Already Exist");
                 return BadRequest(ModelState);
+            }
+
+
+            if (newVilla == null)
+            {
+                return BadRequest(newVilla);
             }
 
             if (newVilla == null)
@@ -109,33 +118,35 @@ namespace MagicVilla_VillaApi.Controllers
                 return BadRequest(newVilla);
             }
 
+
             if (newVilla.Id > 0)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
-
             newVilla.Id = VillaStore.villaList.OrderByDescending(x => x.Id).FirstOrDefault().Id + 1;
             VillaStore.villaList.Add(newVilla);
 
             //return Ok(villaDTO);
             return CreatedAtRoute("SearchVilla", new { id = newVilla.Id }, newVilla);
+
         }
 
         ///***********************************************************************************************************////
         //Delete
-        [HttpDelete("{id:int}",Name = "DeleteVilla")]
+        [HttpDelete("{id:int}", Name = "DeleteVilla")]
 
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
 
-        public IActionResult DeleteVilla(int id) {
-            if(id == 0)
+        public IActionResult DeleteVilla(int id)
+        {
+            if (id == 0)
             {
                 return BadRequest();
             }
-            var villa=VillaStore.villaList.FirstOrDefault(u => u.Id == id);
+            var villa = VillaStore.villaList.FirstOrDefault(u => u.Id == id);
             if (villa == null)
             {
                 return NotFound();
@@ -148,20 +159,20 @@ namespace MagicVilla_VillaApi.Controllers
         ///***********************************************************************************************************////
 
         //Update In this we have to change whole for just one model thats why we use httppatch
-        [HttpPut("{id:int}",Name ="UpdateVilla")]
+        [HttpPut("{id:int}", Name = "UpdateVilla")]
 
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public IActionResult UpdateVilla(int id, [FromBody]VillaDTO villaDTO)
+        public IActionResult UpdateVilla(int id, [FromBody] VillaDTO villaDTO)
         {
-            if(villaDTO == null || id!=villaDTO.Id) { return BadRequest(); }
-            var villa=VillaStore.villaList.FirstOrDefault(u=>u.Id == id);
+            if (villaDTO == null || id != villaDTO.Id) { return BadRequest(); }
+            var villa = VillaStore.villaList.FirstOrDefault(u => u.Id == id);
 
-            villa.Name= villaDTO.Name;
-            villa.Sqft=villaDTO.Sqft;
-            villa.Occupancy=villaDTO.Occupancy;
+            villa.Name = villaDTO.Name;
+            villa.Sqft = villaDTO.Sqft;
+            villa.Occupancy = villaDTO.Occupancy;
 
             return NoContent();
 
@@ -189,7 +200,8 @@ namespace MagicVilla_VillaApi.Controllers
                 return BadRequest(ModelState);
             }
 
-            return NoContent(); 
+            return NoContent();
         }
     }
 }
+

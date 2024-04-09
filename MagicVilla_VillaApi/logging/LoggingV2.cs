@@ -6,12 +6,12 @@
         {
             if (type == "error")
             {
-                Console.BackgroundColor = ConsoleColor.Red; 
+                Console.BackgroundColor = ConsoleColor.Red;
                 Console.WriteLine("Error:-" + message);
             }
             else
             {
-                if(type == "warning")
+                if (type == "warning")
                 {
                     Console.BackgroundColor = ConsoleColor.Yellow;
                     Console.WriteLine("Warning:-" + message);
