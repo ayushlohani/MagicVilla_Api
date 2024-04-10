@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore;
 
 
 
+
+//packages req for entity framework  Microsost.EntityFrameworkCore.Sqlserver   Microsost.EntityFrameworkCore.Tools
+
 //commands for package manager console
 
 //add-migration <Villatablename>    to add migrattion
